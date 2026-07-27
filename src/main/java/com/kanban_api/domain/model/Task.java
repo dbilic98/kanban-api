@@ -32,10 +32,10 @@ public class Task {
   private String description;
 
   @Enumerated(EnumType.STRING)
-  private Status status;
+  private Status status = Status.TO_DO;
 
   @Enumerated(EnumType.STRING)
-  private Priority priority;
+  private Priority priority = Priority.MED;
 
   @Version
   private Long version;
