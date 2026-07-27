@@ -14,6 +14,4 @@ public class ResponseTaskDto {
   private Status status;
 
   private Priority priority;
-
-  private Long version;
 }

@@ -11,7 +11,6 @@ public record CreateTaskDto(
     @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters")
     String title,
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
     String description,
 
     Status status,
