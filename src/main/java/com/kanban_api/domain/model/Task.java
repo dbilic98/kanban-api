@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,18 +25,24 @@ public class Task {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank
   private String title;
 
   private String description;
 
   @Enumerated(EnumType.STRING)
-  private Status status = Status.TO_DO;
+  private Status status;
 
   @Enumerated(EnumType.STRING)
-  private Priority priority = Priority.MED;
+  private Priority priority;
 
   @Version
   private Long version;
+
+  public Task(String title, String description, Status status, Priority priority) {
+    this.title = title;
+    this.description = description;
+    this.status = (status != null) ? status : Status.TO_DO;
+    this.priority = (priority != null) ? priority : Priority.MED;
+  }
 }
 
