@@ -7,7 +7,7 @@ import com.kanban_api.domain.model.Task;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskServiceMapper {
+public class TaskMapper {
 
   public Task toEntity(CreateTaskDto createTaskDto) {
     return new Task(
@@ -16,13 +16,6 @@ public class TaskServiceMapper {
         createTaskDto.status(),
         createTaskDto.priority()
     );
-  }
-
-  public void updateEntity(Task task, UpdateTaskDto updateTaskDto) {
-    task.setTitle(updateTaskDto.title());
-    task.setDescription(updateTaskDto.description());
-    task.setStatus(updateTaskDto.status());
-    task.setPriority(updateTaskDto.priority());
   }
 
   public TaskDto toDto(Task task) {
