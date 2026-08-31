@@ -13,7 +13,7 @@ import com.kanban_api.domain.enumeration.Priority;
 import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import com.kanban_api.domain.repository.TaskRepository;
-import com.kanban_api.domain.service.mapper.TaskServiceMapper;
+import com.kanban_api.domain.service.mapper.TaskMapper;
 import com.kanban_api.exception.TaskNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class TaskServiceTest {
   private TaskRepository taskRepository;
 
   @Mock
-  private TaskServiceMapper taskServiceMapper;
+  private TaskMapper taskMapper;
 
   @InjectMocks
   private TaskService taskService;
@@ -53,19 +53,19 @@ public class TaskServiceTest {
 
     TaskDto expected = new TaskDto(1L, "Task 1", "Create task", Status.TO_DO, Priority.HIGH);
 
-    when(taskServiceMapper.toEntity(createTaskDto)).thenReturn(task);
+    when(taskMapper.toEntity(createTaskDto)).thenReturn(task);
 
     when(taskRepository.save(task)).thenReturn(savedTask);
 
-    when(taskServiceMapper.toDto(savedTask)).thenReturn(expected);
+    when(taskMapper.toDto(savedTask)).thenReturn(expected);
 
     TaskDto result = taskService.createTask(createTaskDto);
 
     assertEquals(expected, result);
 
-    verify(taskServiceMapper).toEntity(createTaskDto);
+    verify(taskMapper).toEntity(createTaskDto);
     verify(taskRepository).save(task);
-    verify(taskServiceMapper).toDto(savedTask);
+    verify(taskMapper).toDto(savedTask);
   }
 
   @Test
@@ -78,14 +78,14 @@ public class TaskServiceTest {
 
     when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
 
-    when(taskServiceMapper.toDto(task)).thenReturn(expected);
+    when(taskMapper.toDto(task)).thenReturn(expected);
 
     TaskDto foundTask = taskService.findTaskById(1L);
 
     assertEquals(expected, foundTask);
 
     verify(taskRepository).findById(1L);
-    verify(taskServiceMapper).toDto(task);
+    verify(taskMapper).toDto(task);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class TaskServiceTest {
 
     when(taskRepository.findByStatus(Status.TO_DO, pageable)).thenReturn(taskPage);
 
-    when(taskServiceMapper.toDto(task)).thenReturn(taskDto);
+    when(taskMapper.toDto(task)).thenReturn(taskDto);
 
     Page<TaskDto> result = taskService.findAllTasks(Status.TO_DO, pageSize, pageNumber,
         Sort.by("id"));
@@ -125,7 +125,7 @@ public class TaskServiceTest {
     assertEquals(taskDto, result.getContent().getFirst());
 
     verify(taskRepository).findByStatus(Status.TO_DO, pageable);
-    verify(taskServiceMapper).toDto(task);
+    verify(taskMapper).toDto(task);
   }
 
   @Test
@@ -143,7 +143,7 @@ public class TaskServiceTest {
 
     when(taskRepository.findAll(pageable)).thenReturn(taskPage);
 
-    when(taskServiceMapper.toDto(task)).thenReturn(taskDto);
+    when(taskMapper.toDto(task)).thenReturn(taskDto);
 
     Page<TaskDto> result = taskService.findAllTasks(null, pageSize, pageNumber, Sort.unsorted());
 
@@ -151,7 +151,7 @@ public class TaskServiceTest {
     assertEquals(taskDto, result.getContent().getFirst());
 
     verify(taskRepository).findAll(pageable);
-    verify(taskServiceMapper).toDto(task);
+    verify(taskMapper).toDto(task);
   }
 
   @Test
@@ -167,15 +167,15 @@ public class TaskServiceTest {
 
     when(taskRepository.findById(1L)).thenReturn(Optional.of(existingTask));
 
-    when(taskServiceMapper.toDto(existingTask)).thenReturn(taskDto);
+    when(taskMapper.toDto(existingTask)).thenReturn(taskDto);
 
     TaskDto result = taskService.updateTask(1L, updateTaskDto);
 
     assertEquals(taskDto, result);
 
     verify(taskRepository).findById(1L);
-    verify(taskServiceMapper).updateEntity(existingTask, updateTaskDto);
-    verify(taskServiceMapper).toDto(existingTask);
+    verify(taskMapper).updateEntity(existingTask, updateTaskDto);
+    verify(taskMapper).toDto(existingTask);
   }
 
   @Test
