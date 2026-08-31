@@ -6,34 +6,36 @@ import com.kanban_api.domain.dto.UpdateTaskDto;
 import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import com.kanban_api.domain.repository.TaskRepository;
-import com.kanban_api.domain.service.mapper.TaskServiceMapper;
+import com.kanban_api.domain.service.mapper.TaskMapper;
 import com.kanban_api.exception.TaskNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class TaskService {
 
   private final TaskRepository taskRepository;
-  private final TaskServiceMapper taskServiceMapper;
+  private final TaskMapper taskMapper;
 
-  public TaskService(TaskRepository taskRepository, TaskServiceMapper taskServiceMapper) {
+  public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
     this.taskRepository = taskRepository;
-    this.taskServiceMapper = taskServiceMapper;
+    this.taskMapper = taskMapper;
   }
 
   public TaskDto createTask(CreateTaskDto createTaskDto) {
-    Task createdTask = taskServiceMapper.toEntity(createTaskDto);
+    Task createdTask = taskMapper.toEntity(createTaskDto);
     Task saved = taskRepository.save(createdTask);
-    return taskServiceMapper.toDto(saved);
+    return taskMapper.toDto(saved);
   }
 
   public TaskDto findTaskById(Long id) {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
-    return taskServiceMapper.toDto(task);
+    return taskMapper.toDto(task);
   }
 
   public Page<TaskDto> findAllTasks(Status status, int pageSize, int pageNumber,
@@ -42,11 +44,11 @@ public class TaskService {
 
     if (status != null) {
       return taskRepository.findByStatus(status, pageable)
-          .map(taskServiceMapper::toDto);
+          .map(taskMapper::toDto);
     }
 
     return taskRepository.findAll(pageable)
-        .map(taskServiceMapper::toDto);
+        .map(taskMapper::toDto);
   }
 
   @Transactional
@@ -54,8 +56,12 @@ public class TaskService {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
 
-    taskServiceMapper.updateEntity(task, updateTaskDto);
-    return taskServiceMapper.toDto(task);
+    task.setTitle(updateTaskDto.title());
+    task.setDescription(updateTaskDto.description());
+    task.setStatus(updateTaskDto.status());
+    task.setPriority(updateTaskDto.priority());
+
+    return taskMapper.toDto(task);
   }
 
   //JSON Merge Patch?
