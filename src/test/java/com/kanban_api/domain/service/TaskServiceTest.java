@@ -157,7 +157,7 @@ public class TaskServiceTest {
   @Test
   void shouldUpdateTask_whenTaskExists() {
 
-    Task existingTask = new Task("Task 1", "Description", Status.TO_DO, Priority.HIGH);
+    Task existingTask = new Task("Old title", "Old description", Status.TO_DO, Priority.LOW);
     existingTask.setId(1L);
 
     UpdateTaskDto updateTaskDto = new UpdateTaskDto("Task 1", "Description", Status.TO_DO,
@@ -171,10 +171,14 @@ public class TaskServiceTest {
 
     TaskDto result = taskService.updateTask(1L, updateTaskDto);
 
+    assertEquals("Task 1", existingTask.getTitle());
+    assertEquals("Description", existingTask.getDescription());
+    assertEquals(Status.DONE, existingTask.getStatus());
+    assertEquals(Priority.HIGH, existingTask.getPriority());
+
     assertEquals(taskDto, result);
 
     verify(taskRepository).findById(1L);
-    verify(taskMapper).updateEntity(existingTask, updateTaskDto);
     verify(taskMapper).toDto(existingTask);
   }
 
