@@ -69,7 +69,6 @@ public class TaskService {
     return taskMapper.toDto(task);
   }
 
-  //JSON Merge Patch?
   public TaskDto patchTask(Long id, JsonNode patch) {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
