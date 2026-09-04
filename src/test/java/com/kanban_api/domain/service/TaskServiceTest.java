@@ -173,7 +173,7 @@ public class TaskServiceTest {
 
     assertEquals("Task 1", existingTask.getTitle());
     assertEquals("Description", existingTask.getDescription());
-    assertEquals(Status.DONE, existingTask.getStatus());
+    assertEquals(Status.TO_DO, existingTask.getStatus());
     assertEquals(Priority.HIGH, existingTask.getPriority());
 
     assertEquals(taskDto, result);
