@@ -7,7 +7,9 @@ import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import com.kanban_api.domain.repository.TaskRepository;
 import com.kanban_api.domain.service.mapper.TaskMapper;
+import com.kanban_api.exception.InvalidPatchFieldException;
 import com.kanban_api.exception.TaskNotFoundException;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,9 +71,19 @@ public class TaskService {
     return taskMapper.toDto(task);
   }
 
+  private static final Set<String> ALLOWED_PATCH_FIELDS =
+      Set.of("title", "description", "status", "priority");
+
+  @Transactional
   public TaskDto patchTask(Long id, JsonNode patch) {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
+
+    for(String field : patch.propertyNames()) {
+      if(!ALLOWED_PATCH_FIELDS.contains(field)) {
+        throw new InvalidPatchFieldException("Field '" + field + "' cannot be patched");
+      }
+    }
 
     objectMapper.readerForUpdating(task).readValue(patch);
     return taskMapper.toDto(task);
