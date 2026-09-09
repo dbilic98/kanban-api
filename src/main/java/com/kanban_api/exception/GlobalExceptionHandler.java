@@ -104,6 +104,22 @@ public class GlobalExceptionHandler {
     );
   }
 
+  @ExceptionHandler(InvalidPatchFieldException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidPatchFieldException(
+      InvalidPatchFieldException e,
+      HttpServletRequest request) {
+
+    log.warn("Invalid patch field: {}", e.getMessage());
+
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Validation error",
+        ErrorCodes.INVALID_FORM,
+        e.getMessage(),
+        request
+    );
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleException(
       Exception e,
