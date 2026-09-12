@@ -1,6 +1,5 @@
 package com.kanban_api.domain.repository;
 
-import com.kanban_api.domain.enumeration.Priority;
 import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import org.springframework.data.domain.Page;
