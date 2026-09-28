@@ -79,8 +79,8 @@ public class TaskService {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
 
-    for(String field : patch.propertyNames()) {
-      if(!ALLOWED_PATCH_FIELDS.contains(field)) {
+    for (String field : patch.propertyNames()) {
+      if (!ALLOWED_PATCH_FIELDS.contains(field)) {
         throw new InvalidPatchFieldException("Field '" + field + "' cannot be patched");
       }
     }
@@ -88,7 +88,6 @@ public class TaskService {
     objectMapper.readerForUpdating(task).readValue(patch);
     return taskMapper.toDto(task);
   }
-
 
   public void deleteTask(Long id) {
     if (taskRepository.existsById(id)) {
