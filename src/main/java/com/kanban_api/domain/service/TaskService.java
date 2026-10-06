@@ -22,6 +22,9 @@ import tools.jackson.databind.ObjectMapper;
 @Service
 public class TaskService {
 
+  private static final Set<String> ALLOWED_PATCH_FIELDS =
+      Set.of("title", "description", "status", "priority");
+
   private final TaskRepository taskRepository;
   private final TaskMapper taskMapper;
   private final ObjectMapper objectMapper;
@@ -71,19 +74,16 @@ public class TaskService {
     return taskMapper.toDto(task);
   }
 
-  private static final Set<String> ALLOWED_PATCH_FIELDS =
-      Set.of("title", "description", "status", "priority");
-
   @Transactional
   public TaskDto patchTask(Long id, JsonNode patch) {
-    Task task = taskRepository.findById(id)
-        .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
 
     for (String field : patch.propertyNames()) {
       if (!ALLOWED_PATCH_FIELDS.contains(field)) {
         throw new InvalidPatchFieldException("Field '" + field + "' cannot be patched");
       }
     }
+    Task task = taskRepository.findById(id)
+        .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
 
     objectMapper.readerForUpdating(task).readValue(patch);
     return taskMapper.toDto(task);
