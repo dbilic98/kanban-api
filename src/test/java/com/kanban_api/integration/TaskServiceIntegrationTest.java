@@ -22,18 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-@Testcontainers
 @SpringBootTest
-public class TaskServiceIntegrationTest {
-
-  @Container
-  static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0");
+public class TaskServiceIntegrationTest extends AbstractIntegrationTest {
 
   @Autowired
   private TaskService taskService;
