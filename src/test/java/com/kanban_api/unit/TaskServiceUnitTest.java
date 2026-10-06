@@ -1,7 +1,9 @@
-package com.kanban_api.domain.service;
+package com.kanban_api.unit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,12 +15,15 @@ import com.kanban_api.domain.enumeration.Priority;
 import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import com.kanban_api.domain.repository.TaskRepository;
+import com.kanban_api.domain.service.TaskService;
 import com.kanban_api.domain.service.mapper.TaskMapper;
+import com.kanban_api.exception.InvalidPatchFieldException;
 import com.kanban_api.exception.TaskNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,15 +32,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
 
 @ExtendWith(MockitoExtension.class)
-public class TaskServiceTest {
+public class TaskServiceUnitTest {
 
   @Mock
   private TaskRepository taskRepository;
 
   @Mock
   private TaskMapper taskMapper;
+
+  @Mock
+  private ObjectMapper objectMapper;
 
   @InjectMocks
   private TaskService taskService;
@@ -173,7 +184,7 @@ public class TaskServiceTest {
 
     assertEquals("Task 1", existingTask.getTitle());
     assertEquals("Description", existingTask.getDescription());
-    assertEquals(Status.DONE, existingTask.getStatus());
+    assertEquals(Status.TO_DO, existingTask.getStatus());
     assertEquals(Priority.HIGH, existingTask.getPriority());
 
     assertEquals(taskDto, result);
@@ -194,6 +205,78 @@ public class TaskServiceTest {
     assertEquals("Task with ID 99 not found", exception.getMessage());
 
     verify(taskRepository).findById(99L);
+  }
+
+  @Test
+  void shouldPatchTask_whenTaskExists() {
+
+    Task existingTask = new Task("Old task", "Old description", Status.TO_DO, Priority.LOW);
+    existingTask.setId(1L);
+
+    TaskDto expected = new TaskDto(1L, "New title", "Old description", Status.TO_DO, Priority.LOW);
+
+    JsonNode patch = mock(JsonNode.class);
+    ObjectReader objectReader = mock(ObjectReader.class);
+
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(existingTask));
+
+    when(patch.propertyNames()).thenReturn(List.of("title"));
+
+    when(objectMapper.readerForUpdating(existingTask)).thenReturn(objectReader);
+
+    when(objectReader.readValue(patch)).thenReturn(existingTask);
+
+    when(taskMapper.toDto(existingTask)).thenReturn(expected);
+
+    TaskDto result = taskService.patchTask(1L, patch);
+
+    assertEquals(expected, result);
+
+    verify(taskRepository).findById(1L);
+    verify(patch).propertyNames();
+    verify(objectMapper).readerForUpdating(existingTask);
+    verify(objectReader).readValue(patch);
+    verify(taskMapper).toDto(existingTask);
+  }
+
+  @Test
+  void shouldThrowTaskNotFoundException_whenPatchingNonExistingTask() {
+
+    JsonNode patch = mock(JsonNode.class);
+
+    when(taskRepository.findById(99L)).thenReturn(Optional.empty());
+
+    TaskNotFoundException exception = assertThrows(TaskNotFoundException.class,
+        () -> taskService.patchTask(99L, patch));
+
+    assertEquals("Task with ID 99 not found", exception.getMessage());
+
+    verify(taskRepository).findById(99L);
+    verify(objectMapper, never()).readerForUpdating(ArgumentMatchers.any());
+    verify(taskMapper, never()).toDto(ArgumentMatchers.any());
+  }
+
+  @Test
+  void shouldThrowInvalidPatchFieldException_whenFieldIsNotAllowed() {
+
+    Task existingTask = new Task("Old task", "Old description", Status.TO_DO, Priority.LOW);
+    existingTask.setId(1L);
+
+    JsonNode patch = mock(JsonNode.class);
+
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(existingTask));
+
+    when(patch.propertyNames()).thenReturn(List.of("id"));
+
+    InvalidPatchFieldException exception = assertThrows(InvalidPatchFieldException.class,
+        () -> taskService.patchTask(1L, patch));
+
+    assertEquals("Field 'id' cannot be patched", exception.getMessage());
+
+    verify(taskRepository).findById(1L);
+    verify(patch).propertyNames();
+    verify(objectMapper, never()).readerForUpdating(ArgumentMatchers.any());
+    verify(taskMapper, never()).toDto(any());
   }
 
   @Test

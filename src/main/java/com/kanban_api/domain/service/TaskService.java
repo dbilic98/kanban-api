@@ -7,23 +7,33 @@ import com.kanban_api.domain.enumeration.Status;
 import com.kanban_api.domain.model.Task;
 import com.kanban_api.domain.repository.TaskRepository;
 import com.kanban_api.domain.service.mapper.TaskMapper;
+import com.kanban_api.exception.InvalidPatchFieldException;
 import com.kanban_api.exception.TaskNotFoundException;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class TaskService {
 
+  private static final Set<String> ALLOWED_PATCH_FIELDS =
+      Set.of("title", "description", "status", "priority");
+
   private final TaskRepository taskRepository;
   private final TaskMapper taskMapper;
+  private final ObjectMapper objectMapper;
 
-  public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+  public TaskService(TaskRepository taskRepository, TaskMapper taskMapper,
+      ObjectMapper objectMapper) {
     this.taskRepository = taskRepository;
     this.taskMapper = taskMapper;
+    this.objectMapper = objectMapper;
   }
 
   public TaskDto createTask(CreateTaskDto createTaskDto) {
@@ -64,8 +74,20 @@ public class TaskService {
     return taskMapper.toDto(task);
   }
 
-  //JSON Merge Patch?
+  @Transactional
+  public TaskDto patchTask(Long id, JsonNode patch) {
 
+    for (String field : patch.propertyNames()) {
+      if (!ALLOWED_PATCH_FIELDS.contains(field)) {
+        throw new InvalidPatchFieldException("Field '" + field + "' cannot be patched");
+      }
+    }
+    Task task = taskRepository.findById(id)
+        .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
+
+    objectMapper.readerForUpdating(task).readValue(patch);
+    return taskMapper.toDto(task);
+  }
 
   public void deleteTask(Long id) {
     if (taskRepository.existsById(id)) {
