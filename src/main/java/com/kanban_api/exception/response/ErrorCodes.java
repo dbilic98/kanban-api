@@ -15,6 +15,9 @@ public enum ErrorCodes {
   REQUIRED_FIELD_MISSING(4002, "Required field missing"),
   INVALID_FORM(4003, "Invalid format"),
 
+  //Conflict 40xx
+  TASK_CONFLICT(4009, "Task was modified in the meantime. Please refresh and try again."),
+
   //Serve 50xx
   INTERNAL_ERROR(5001, "Internal server error");
 
