@@ -80,10 +80,9 @@ public class TaskService {
       taskRepository.flush();
     } catch (OptimisticLockingFailureException e) {
       throw new UpdateTaskOptimisticLockException(
-          "Task with ID " + id + " was modified in the meantime"
+          "Task with ID " + id + " was modified in the meantime", e
       );
     }
-
     return taskMapper.toDto(task);
   }
 
