@@ -120,6 +120,21 @@ public class GlobalExceptionHandler {
     );
   }
 
+  @ExceptionHandler(UpdateTaskOptimisticLockException.class)
+  public ResponseEntity<ErrorResponse> handleUpdateTaskOptimisticLockException(
+      UpdateTaskOptimisticLockException e, HttpServletRequest request) {
+
+    log.warn("Optimistic locking conflict: {}", e.getMessage());
+
+    return buildErrorResponse(
+        HttpStatus.CONFLICT,
+        "Task conflict",
+        ErrorCodes.TASK_CONFLICT,
+        ErrorCodes.TASK_CONFLICT.getMessage(),
+        request
+    );
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleException(
       Exception e,
