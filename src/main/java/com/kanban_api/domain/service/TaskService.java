@@ -9,7 +9,9 @@ import com.kanban_api.domain.repository.TaskRepository;
 import com.kanban_api.domain.service.mapper.TaskMapper;
 import com.kanban_api.exception.InvalidPatchFieldException;
 import com.kanban_api.exception.TaskNotFoundException;
+import com.kanban_api.exception.UpdateTaskOptimisticLockException;
 import java.util.Set;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,13 +65,24 @@ public class TaskService {
 
   @Transactional
   public TaskDto updateTask(Long id, UpdateTaskDto updateTaskDto) {
+
     Task task = taskRepository.findById(id)
-        .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
+        .orElseThrow(() ->
+            new TaskNotFoundException("Task with ID " + id + " not found")
+        );
 
     task.setTitle(updateTaskDto.title());
     task.setDescription(updateTaskDto.description());
     task.setStatus(updateTaskDto.status());
     task.setPriority(updateTaskDto.priority());
+
+    try {
+      taskRepository.flush();
+    } catch (OptimisticLockingFailureException e) {
+      throw new UpdateTaskOptimisticLockException(
+          "Task with ID " + id + " was modified in the meantime"
+      );
+    }
 
     return taskMapper.toDto(task);
   }
