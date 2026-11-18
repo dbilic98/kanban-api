@@ -45,7 +45,7 @@ public class TaskController {
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize, Sort sort) {
 
-    Page<TaskDto> tasks = taskService.findAllTasks(status, pageSize, pageNumber, sort);
+    Page<TaskDto> tasks = taskService.findAllTasks(status, pageNumber, pageSize, sort);
     Page<TaskResponse> taskResponse = tasks.map(taskApiMapper::toResponse);
     return new PaginatedResponse<>(taskResponse);
   }

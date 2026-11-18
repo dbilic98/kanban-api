@@ -129,7 +129,7 @@ public class TaskServiceUnitTest {
 
     when(taskMapper.toDto(task)).thenReturn(taskDto);
 
-    Page<TaskDto> result = taskService.findAllTasks(Status.TO_DO, pageSize, pageNumber,
+    Page<TaskDto> result = taskService.findAllTasks(Status.TO_DO, pageNumber, pageSize,
         Sort.by("id"));
 
     assertEquals(1, result.getTotalElements());
@@ -156,7 +156,7 @@ public class TaskServiceUnitTest {
 
     when(taskMapper.toDto(task)).thenReturn(taskDto);
 
-    Page<TaskDto> result = taskService.findAllTasks(null, pageSize, pageNumber, Sort.unsorted());
+    Page<TaskDto> result = taskService.findAllTasks(null, pageNumber, pageSize, Sort.unsorted());
 
     assertEquals(1, result.getTotalElements());
     assertEquals(taskDto, result.getContent().getFirst());
