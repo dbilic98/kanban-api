@@ -122,7 +122,7 @@ public class TaskServiceIntegrationTest extends AbstractIntegrationTest {
     int pageNumber = 0;
     int pageSize = 2;
 
-    Page<TaskDto> result = taskService.findAllTasks(null, pageSize, pageNumber, Sort.unsorted());
+    Page<TaskDto> result = taskService.findAllTasks(null, pageNumber, pageSize, Sort.unsorted());
 
     assertEquals(2, result.getContent().size());
   }
@@ -146,7 +146,7 @@ public class TaskServiceIntegrationTest extends AbstractIntegrationTest {
     int pageNumber = 0;
     int pageSize = 2;
 
-    Page<TaskDto> result = taskService.findAllTasks(Status.TO_DO, pageSize, pageNumber,
+    Page<TaskDto> result = taskService.findAllTasks(Status.TO_DO, pageNumber, pageSize,
         Sort.unsorted());
 
     assertEquals(2, result.getContent().size());
@@ -171,7 +171,7 @@ public class TaskServiceIntegrationTest extends AbstractIntegrationTest {
     int pageNumber = 0;
     int pageSize = 2;
 
-    Page<TaskDto> result = taskService.findAllTasks(null, pageSize, pageNumber, Sort.unsorted());
+    Page<TaskDto> result = taskService.findAllTasks(null, pageNumber, pageSize, Sort.unsorted());
 
     assertEquals(2, result.getContent().size());
   }
@@ -195,7 +195,7 @@ public class TaskServiceIntegrationTest extends AbstractIntegrationTest {
     int pageNumber = 0;
     int pageSize = 3;
 
-    Page<TaskDto> result = taskService.findAllTasks(null, pageSize, pageNumber,
+    Page<TaskDto> result = taskService.findAllTasks(null, pageNumber, pageSize,
         Sort.by("title").ascending());
 
     assertEquals("Login", result.getContent().get(0).title());

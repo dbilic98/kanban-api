@@ -50,7 +50,7 @@ public class TaskService {
     return taskMapper.toDto(task);
   }
 
-  public Page<TaskDto> findAllTasks(Status status, int pageSize, int pageNumber,
+  public Page<TaskDto> findAllTasks(Status status, int pageNumber, int pageSize,
       Sort sort) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
